@@ -1,7 +1,6 @@
-fastapi
-uvicorn
-httpx
-pydantic
-python-multipart
-jinja2
-sqlparse
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+httpx==0.27.0
+jinja2==3.1.4
+python-multipart==0.0.9
+itsdangerous==2.1.2
