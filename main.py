@@ -11,6 +11,7 @@ sessions = {}
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    # Правильный вызов: request первым аргументом
     return templates.TemplateResponse(request, "index.html", {"request": request})
 
 @app.get("/auth/dune")
@@ -23,7 +24,11 @@ async def auth_dune():
 async def query_form(request: Request, session_id: str):
     if session_id not in sessions:
         return RedirectResponse("/")
-    return templates.TemplateResponse(request, "query.html", {"request": request, "session_id": session_id})
+    return templates.TemplateResponse(
+        request, 
+        "query.html", 
+        {"request": request, "session_id": session_id}
+    )
 
 @app.post("/translate")
 async def translate_query(session_id: str = Form(...), query_text: str = Form(...)):
@@ -37,7 +42,8 @@ async def translate_query(session_id: str = Form(...), query_text: str = Form(..
 -- Ваш запрос: {query_text}
 SELECT 
     date_trunc('day', block_time) as day,
-    COUNT(*) as tx_count
+    COUNT(*) as transaction_count,
+    SUM(gas_used) as total_gas
 FROM dune.ethereum.transactions
 WHERE block_time >= CURRENT_DATE - INTERVAL '7' DAY
 GROUP BY 1
@@ -48,9 +54,10 @@ LIMIT 100;
     <html>
         <head><title>SQL готов</title></head>
         <body style="font-family: monospace; padding: 20px;">
-            <h2>✅ SQL сгенерирован</h2>
-            <p><strong>Запрос:</strong> {query_text}</p>
-            <pre style="background:#f0f0f0;padding:15px;">{sql_query}</pre>
+            <h2>✅ SQL запрос сгенерирован</h2>
+            <p><strong>Ваш запрос:</strong> {query_text}</p>
+            <p><strong>SQL для Dune:</strong></p>
+            <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px;">{sql_query}</pre>
             <a href="/query?session_id={session_id}">← Новый запрос</a>
         </body>
     </html>
