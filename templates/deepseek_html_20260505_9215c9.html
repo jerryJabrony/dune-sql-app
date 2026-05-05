@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создание запроса</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            min-height: 120px;
+            margin: 15px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .examples {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .example-item {
+            cursor: pointer;
+            color: #0066cc;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📝 Введите запрос для Dune Analytics</h2>
+        <p>Опишите данные, которые хотите получить:</p>
+        
+        <textarea id="queryInput" placeholder="Например: показать топ 10 пользователей Uniswap по объему торгов за последние 7 дней"></textarea>
+        
+        <button onclick="submitQuery()">🚀 Создать SQL и перейти в Dune</button>
+        
+        <div class="examples">
+            <h3>Примеры запросов:</h3>
+            <div class="example-item" onclick="setExample('показать количество транзакций на Ethereum по дням за последнюю неделю')">
+                📊 показать количество транзакций на Ethereum по дням
+            </div>
+            <div class="example-item" onclick="setExample('какой контракт сгенерировал больше всего газа на Polygon вчера')">
+                ⛽ какой контракт сгенерировал больше всего газа
+            </div>
+            <div class="example-item" onclick="setExample('динамика цены ETH за последние 30 дней')">
+                📈 динамика цены ETH за 30 дней
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function submitQuery() {
+            const queryText = document.getElementById('queryInput').value;
+            if (!queryText.trim()) {
+                alert('Пожалуйста, введите запрос');
+                return;
+            }
+            
+            const sessionId = new URLSearchParams(window.location.search).get('session_id');
+            
+            const formData = new URLSearchParams();
+            formData.append('session_id', sessionId);
+            formData.append('query_text', queryText);
+            
+            const response = await fetch('/translate', {
+                method: 'POST',
+                body: formData,
+                redirect: 'manual'
+            });
+            
+            if (response.status === 400) {
+                const error = await response.text();
+                alert('Ошибка: ' + error);
+            } else {
+                window.location.href = response.url;
+            }
+        }
+        
+        function setExample(text) {
+            document.getElementById('queryInput').value = text;
+        }
+    </script>
+</body>
+</html>
